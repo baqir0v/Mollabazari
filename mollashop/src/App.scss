@@ -1,15 +1,15 @@
 .allcontainer{
-  border:  1px solid black;
   width: 80%;
   margin-left: auto;
   margin-right: auto;
   display: flex;
+  border: 0.1rem solid #ebebeb;
   .filtersside{
     width: 25%;
-    border: 1px solid greenyellow;
   }
   .shopside{
     width: 75%;
-    border: 1px solid black;
+    border-left: 0.1rem solid #ebebeb;
+    
   }
 }

@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
 import useFetch from "../../hooks/usefetch";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faGlasses } from "@fortawesome/free-solid-svg-icons";
+import { faHeart } from "@fortawesome/free-solid-svg-icons";
+import { faRandom } from "@fortawesome/free-solid-svg-icons";
+import { Slider } from "antd"
+
 import "./products.scss";
 
 function Products() {
@@ -8,14 +15,29 @@ function Products() {
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [selectedColor, setSelectedColor] = useState([]);
     const [selectedSize, setSelectedSize] = useState([]);
-    const [selectedBrand, setSelectedBrand] = useState([])
+    const [selectedBrand, setSelectedBrand] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [isCategoryOpen, setIsCategoryOpen] = useState(true);
-    const [isColorOpen, setIsColorOpen] = useState(true);
-    const [isSizeOpen, setIsSizeOpen] = useState(true);
-    const [isBrandOpen, setIsBrandOpen] = useState(true)
-    const [isPriceOpen, setIsPriceOpen] = useState(true);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [isColorOpen, setIsColorOpen] = useState(false);
+    const [isSizeOpen, setIsSizeOpen] = useState(false);
+    const [isBrandOpen, setIsBrandOpen] = useState(false);
+    const [isPriceOpen, setIsPriceOpen] = useState(false);
     const itemsPerPage = 4;
+    const [priceRange, setPriceRange] = useState([0, 120]);
+
+    const handlePriceChange = (value) => {
+        setPriceRange(value);
+        if (value[0] < priceRange[0] || value[1] > priceRange[1]) {
+            fetchData();
+        } else {
+            const filtered = data.filter(
+                (item) => item.price >= value[0] && item.price <= value[1]
+            );
+            setData([...filtered]);
+            setCurrentPage(1);
+        }
+    };
+
 
     useEffect(() => {
         fetchData();
@@ -35,16 +57,6 @@ function Products() {
         e.preventDefault();
         const sortByCategory = [...data].sort((a, b) => b.name.localeCompare(a.name));
         setData([...sortByCategory]);
-    };
-
-    const handleLowtoHigh = () => {
-        const sortByPrice = [...data].sort((a, b) => a.price - b.price);
-        setData(sortByPrice);
-    };
-
-    const handleHightoLow = () => {
-        const sortByPrice = [...data].sort((a, b) => b.price - a.price);
-        setData(sortByPrice);
     };
 
     const sortByTwo = () => {
@@ -82,20 +94,23 @@ function Products() {
             setSelectedSize([...selectedSize, size]);
         }
     };
+
     const applyBrandFilter = (brand) => {
         if (selectedBrand.includes(brand)) {
-            setSelectedBrand(selectedBrand.filter((b) => b !== brand))
+            setSelectedBrand(selectedBrand.filter((b) => b !== brand));
+        } else {
+            setSelectedBrand([...selectedBrand, brand]);
         }
-        else {
-            setSelectedBrand([...selectedBrand, brand])
-        }
-    }
+    };
 
     const clearAllFilters = () => {
         setSelectedCategories([]);
         setSelectedColor([]);
         setSelectedSize([]);
-        setSelectedBrand([])
+        setSelectedBrand([]);
+        setPriceRange([]);
+        setPriceRange([0, 120]); // Reset price range to its initial value
+        fetchData(); // Fetch the original data
     };
 
     const filteredData = data.filter(
@@ -135,7 +150,7 @@ function Products() {
                     <span onClick={clearAllFilters}>Clear All</span>
                 </div>
                 <div className="category">
-                    <h2 onClick={() => setIsCategoryOpen(!isCategoryOpen)}>Category</h2>
+                    <h2 onClick={() => setIsCategoryOpen(!isCategoryOpen)}>Category <FontAwesomeIcon icon={faChevronDown} /></h2>
                     {isCategoryOpen && (
                         <>
                             <label>
@@ -224,14 +239,14 @@ function Products() {
                                     />
                                     Jumpers
                                 </div>
-                                <span>4</span>
+                                <span>1</span>
                             </label>
                         </>
                     )}
                 </div>
                 {/* ////////////////////////////////////////////////////////////////////////////////// */}
                 <div>
-                    <h2 className="colortext" onClick={() => setIsColorOpen(!isColorOpen)}>Color</h2>
+                    <h2 className="colortext" onClick={() => setIsColorOpen(!isColorOpen)}>Color <FontAwesomeIcon icon={faChevronDown} /></h2>
                     {isColorOpen && (
                         <>
                             <div className="colors">
@@ -291,7 +306,7 @@ function Products() {
                 </div>
                 {/*//////////////////////////////////////////////////////////////////////////////////////////////*/}
                 <div className="sizes">
-                    <h2 onClick={() => setIsSizeOpen(!isSizeOpen)}>Size</h2>
+                    <h2 onClick={() => setIsSizeOpen(!isSizeOpen)}>Size <FontAwesomeIcon icon={faChevronDown} /></h2>
                     {isSizeOpen && (
                         <>
                             <label>
@@ -364,8 +379,8 @@ function Products() {
                     )}
                 </div>
                 {/*//////////////////////////////////////////////////////////////////////////////////////////////*/}
-                <div>
-                    <h2 onClick={() => setIsBrandOpen(!isBrandOpen)}>Brand</h2>
+                <div className="brand">
+                    <h2 onClick={() => setIsBrandOpen(!isBrandOpen)}>Brand <FontAwesomeIcon icon={faChevronDown} /></h2>
                     {isBrandOpen && (
                         <>
                             <label>
@@ -439,13 +454,20 @@ function Products() {
                     )}
                 </div>
                 {/*//////////////////////////////////////////////////////////////////////////////////////////////*/}
-                <h2 onClick={() => setIsPriceOpen(!isPriceOpen)}>Price</h2>
+                <h2 onClick={() => setIsPriceOpen(!isPriceOpen)}>Price <FontAwesomeIcon icon={faChevronDown} /></h2>
                 {isPriceOpen && (
                     <>
-                        <div className="price">
-                            <button onClick={handleLowtoHigh}>Low To High</button>
-                            <button onClick={handleHightoLow}>High To Low</button>
-                        </div>
+                        <Slider
+                            range={{
+                                draggableTrack: true,
+
+
+                            }}
+                            value={priceRange}
+                            max={120}
+                            onChange={handlePriceChange}
+                        />
+
                     </>
                 )}
 
@@ -453,13 +475,13 @@ function Products() {
             <div className="shopside">
                 <div className="sort">
                     <div className="sortleft">
-                        <p>Showing <span>{filteredData.length} of 56</span> Products</p>
+                        <p>Showing <span>{filteredData.length} of 12</span> Products</p>
                     </div>
                     <div className="sortright">
                         <p>Sort by:</p>
                         <div>
-                            <button onClick={handleAtoZ}>A-Z</button>
-                            <button onClick={handleZtoA}>Z-A</button>
+                            <button className="sortbtn" onClick={handleAtoZ}>A-Z</button>
+                            <button className="sortbtn" onClick={handleZtoA}>Z-A</button>
                         </div>
                         <button onClick={sortByTwo}>
                             <svg width="10" height="10">
@@ -499,7 +521,17 @@ function Products() {
                 >
                     {currentItems.map((item) => (
                         <ul key={item.id}>
-                            <img src={item.image} alt="" />
+                            <div className="cardimgs">
+                                <img src={item.image} alt="" />
+                                <div className="righticons">
+                                    <div className="circle"><FontAwesomeIcon icon={faHeart} /></div>
+                                    <div className="circle"><FontAwesomeIcon icon={faGlasses} /></div>
+                                    <div className="circle"><FontAwesomeIcon icon={faRandom} /></div>
+                                </div>
+                                <div className="addtocart">
+                                    <p>Add To Cart</p>
+                                </div>
+                            </div>
                             <li>{item.category}</li>
                             <li>{item.name}</li>
                             <li>${item.price}</li>
